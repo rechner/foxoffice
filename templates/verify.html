@@ -1,0 +1,82 @@
+{% extends "layout.html" %}
+{% block title %}Ticket Scanner{% endblock %}
+
+{% block body %}
+<div class="row">
+    <div class="col-md-6 col-md-offset-3">
+
+        <div class="btn-group btn-group-justified" role="group">
+            <a class="btn btn-primary btn-lg" href="{{ url_for('index') }}" style="width: 0.3%">
+                <span class="glyphicon glyphicon-home"></span>
+            </a>
+            <a class="btn btn-success btn-block btn-lg" id="scan-button"
+                href="zxing://scan/?ret={{ url_for('scan', code="", _external=True) | urlencode }}{CODE}&SCAN_FORMATS=QR_CODE,DATA_MATRIX">
+                <span class="glyphicon glyphicon-qrcode"></span> Scan Ticket
+            </a>
+        </div>
+
+        {% if error %}
+            <div class="alert alert-danger">
+                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                {{ error }}
+            </div>
+        {% endif %}
+
+        {% if result %}
+        <div class="box row">
+            <div class="col-md-6">
+                <span class="glyphicon big glyphicon-
+                    {%- if result.status == 'Approved' and result.checkin is none %}ok success{% else %}remove error{% endif %}"></span>
+            </div>
+            <div class="col-md-6">
+                <h2 class="text-center">{{ result.person.name|e }}</h2>
+                <p class="text-center lead">
+                {% if result.checkin is not none %}
+                    Already scanned at {{ result.checkin | ctime }}<br>
+                {% endif %}
+                    ({{ result.seats }} Seat{{ 's' if result.seats > 1 }})
+                    {{ result.status }}<br>
+                    {{ result.person.email if result.person.email is not none }}
+                </p>
+            </div>
+        </div>
+        {% else %}
+        <div class="box">
+            <div class="alert alert-danger">
+                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                Invalid ticket
+            </div>
+        </div>
+        {% endif %}
+        
+        <div id="timer-circle"></div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $(document).on('click touchstart', function () {
+            $("#timer-circle").pietimer('pause');
+            $(this).unbind('click touchstart');
+        });
+
+        $("#timer-circle").pietimer({ 
+                seconds: 6,
+                color: 'rgba(255, 255, 255, 0.8)',
+                height: 40,
+                width: 40
+            }, function () {
+                // Redirect doesn't work on android
+                var url = "zxing://scan/?ret={{ url_for('scan', code="", _external=True) | urlencode }}{CODE}&SCAN_FORMATS=QR_CODE,DATA_MATRIX";
+                //var url = "http://zxing.appspot.com/scan?ret=http%3A%2F%2Ffoo.com%2Fproducts%2F%7BCODE%7D%2Fdescription&SCAN_FORMATS=UPC_A,EAN_13";
+                var url = "intent://scan/#Intent;scheme=zxing;package=com.google.zxing.client.android;end";
+                //window.location.replace(url); 
+                location.replace(url);
+                //window.open(url);
+                
+            
+        });
+        //$("#timer-circle").pietimer('start');
+    });
+</script>
+{% endblock %}

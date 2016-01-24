@@ -1,0 +1,19 @@
+{% extends "layout.html" %}
+{% block title %}Ticket Scanner{% endblock %}
+
+{% block body %}
+<div class="row">
+    <div class="col-md-4 col-md-offset-4">
+        <h2>Yay</h2>
+
+        <a class="btn btn-success btn-block btn-lg"
+            href="zxing://scan/?ret={{ url_for('scan', code="", _external=True) | urlencode }}{CODE}&SCAN_FORMATS=QR_CODE,DATA_MATRIX">
+            <span class="glyphicon glyphicon-qrcode"></span> Scan Tickets (QR)
+        </a>
+
+        <a class="btn btn-primary btn-block btn-lg" href="{{ url_for('manual_scan') }}">
+            <span class="glyphicon glyphicon-barcode"></span> Manual Entry (OTG Scanner)
+        </a>
+    </div>
+</div>
+{% endblock %}
