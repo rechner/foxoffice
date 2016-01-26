@@ -89,7 +89,9 @@ def scan(code):
 def manual_scan():
     result, error = None, None
     if request.method == 'POST':
-        result = search_ticket(request.form['input'].upper())
+        query = request.form['input'].upper()
+        query = query.replace('-', '')
+        result = search_ticket(query)
         if result is None:
             error = 'No results for {0}'.format(request.form['input'])
     return render_template('manual.html', result=result, error=error)

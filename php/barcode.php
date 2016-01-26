@@ -43,6 +43,10 @@ function generate_ticket($name, $code, $current=1, $seats=1) {
     return $canvas;
 }
 
-generate_ticket('Andrew \"Spots McGee\" McMillion', 'ABCDEFGHJKLM', 1, 1);
+if ($argc == 6) {
+    generate_ticket($argv[1], $argv[2], $argv[3], $argv[4], $argv[5]);
+} else {
+    echo "Usage: $argv[0] <name> <code> <seat of> <total seats> <output file>\n\n";
+}
 
 ?>
