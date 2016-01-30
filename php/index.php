@@ -8,15 +8,31 @@
  *  3) Email PDF to everyone
 */
 
-function process_csv() {
+class CSVException extends Exception { }
+
+function process_csv($csv_string) {
   // Process the CSV into an array of associative arrays, using
   // the first row headers as keys.
-  $rows = array_map('str_getcsv', file('myfile.csv'));
-  $header = array_shift($rows);
+  $rows = array_map('str_getcsv', file($csv_string));
+
+  // Ignore rows that are only one column (which the events plugin helpfully adds)
+  do {
+    $header = array_shift($rows);
+  } while ((sizeof($header) > 1) or ($array[1] === ''));
+  
+  if (!(in_array('Name', $header, true) and
+        in_array('Spaces', $header, true) and
+        in_array('Email', $header, true) and
+        in_array('Status', $header, true))) {
+    throw new CSVException('Expected headers were not found');
+  }
+
   $csv = array();
   foreach ($rows as $row) {
       $csv[] = array_combine($header, $row);
   }
+
+  return $csv;
 }
 
 function generate_reg_code() {
@@ -59,5 +75,52 @@ function generate_reg_code() {
     return $newstring;
 }
 
-
 ?>
+
+
+<html>
+   <body>
+      <h1>Upload CSV</h1>
+      
+      <form action="" method="POST" enctype="multipart/form-data">
+         <input type="file" name="csv" accept=".csv" />
+         <input type="submit"/>
+      </form>
+      
+        <?php
+        if (isset($_FILES['csv'])) {
+          $errors = array();
+          $file_ext = strtolower(end(explode('.', $_FILES['csv']['name'])));
+          if ($file_ext !== 'csv') {
+            $errors[] = "File extension must be CSV.";
+          }
+
+          if (empty($errors) == true) {
+            try {
+              $csv_data = process_csv($_FILES['csv']['tmp_name']);
+
+              # Loop through each row, check if person is in `people` table
+
+              # Status is 'Approved':
+                # Person exists in `people` table:
+                  # Check that person has correct number of seats (both rows and `tickets.seats`)
+                  # Generate more if needed
+                  # Email ticket PDF
+                # ELSE person does not exist:
+                  # Add to `people` table, generate ticket codes and row
+                  # Email ticket PDF
+              # Status is 'Cancelled':
+                # Person exists in `people` table:
+                  # Remove associated rows from `tickets`
+                  # Remove row from `people`
+
+
+            } catch (CSVException $e) {
+              $errors[] = "Error while processing file: " . $e->getMessage();
+            }
+          }
+        }
+
+        ?>
+   </body>
+</html>
