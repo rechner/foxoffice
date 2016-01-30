@@ -1,6 +1,6 @@
 <?php
 
-function generate_ticket($name, $code, $current=1, $seats=1) {
+function generate_ticket($name, $code, $current=1, $seats=1, $outfile='') {
     $name = stripcslashes($name);
 
     $canvas = imagecreatetruecolor(900, 450);
@@ -39,14 +39,26 @@ function generate_ticket($name, $code, $current=1, $seats=1) {
     imagettftext($canvas, 18, 0, 40, 240, 0, 'fonts/FreeSansBold.otf', "$name\n$seats_message");
     imagettftext($canvas, 12, 0, 40, 430, 0, 'fonts/FreeMono.otf', 'Generated ' . date(DateTime::ISO8601));
 
-    imagepng($canvas, 'test.png');
+    if ($outfile !== '') {
+      imagepng($canvas, $outfile);
+    }
+
     return $canvas;
 }
 
-if ($argc == 6) {
-    generate_ticket($argv[1], $argv[2], $argv[3], $argv[4], $argv[5]);
+# Are we running from the command line?
+if (php_sapi_name() === 'cli' OR defined('STDIN')) {
+  if ($argc == 6) {
+      generate_ticket($argv[1], $argv[2], $argv[3], $argv[4], $argv[5]);
+  } else {
+      echo "Usage: $argv[0] <name> <code> <seat of> <total seats> <output file>\n\n";
+  }
 } else {
-    echo "Usage: $argv[0] <name> <code> <seat of> <total seats> <output file>\n\n";
+  # Take arguments as GET parameters and return an image
+  $ticket = generate_ticket($_GET['name'], $_GET['code'], $_GET['current'], $_GET['seats'], '');
+
+  header("Content-type: image/png");
+  imagepng($ticket);
 }
 
 ?>
