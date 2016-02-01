@@ -39,13 +39,14 @@ function generate_ticket($name, $code, $current=1, $seats=1, $outfile='') {
     imagettftext($canvas, 18, 0, 40, 240, 0, 'fonts/FreeSansBold.otf', "$name\n$seats_message");
     imagettftext($canvas, 12, 0, 40, 430, 0, 'fonts/FreeMono.otf', 'Generated ' . date(DateTime::ISO8601));
 
-    if ($outfile !== '') {
-      imagepng($canvas, $outfile);
-    }
+    #if ($outfile !== '') {
+    #  imagepng($canvas, $outfile);
+    #}
 
     return $canvas;
 }
 
+/*
 # Are we running from the command line?
 if (php_sapi_name() === 'cli' OR defined('STDIN')) {
   if ($argc == 6) {
@@ -60,5 +61,6 @@ if (php_sapi_name() === 'cli' OR defined('STDIN')) {
   header("Content-type: image/png");
   imagepng($ticket);
 }
+ */
 
 ?>
