@@ -28,7 +28,7 @@ function generate_ticket($name, $code, $current=1, $seats=1, $outfile='') {
     if ($seats > 1) {
         $seats_message = "$current of $seats Seats";
     } else {
-        $seats_message = "$seats Seat";
+        $seats_message = "$current Seat";
     }
 
     $grey = imagecolorallocate($canvas, 80, 80, 80);
