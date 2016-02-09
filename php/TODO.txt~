@@ -11,8 +11,14 @@ ToDo
 	- If all tickets have been created, generate a PDF and store it in the PDF folder
 	- PDF will be named in format of "Order[ordernumber].pdf" with the ordernumber value padded to 6 digits
 	- Insert name of PDF file into order record in orders table
-	- Email PDF to individuals (optional) and set emailed to 1
-
+	- Email links to PDF download to individuals (optional) and set emailed to 1
+	
+- Download script
+	- Accept two get variables, hash from the order record and email from the person record linked to order
+	- If both values lead to a valid order, use fpassthru() to provide user with PDF
+	- Enumeration proof error message such as "invalid order" if no match is found
+	- Increment downloads value in orders table
+	
 - Rudimentary user management
 	- Allow logged in user to create additional user
 	- Allow logged in user to change own and other users passwords
