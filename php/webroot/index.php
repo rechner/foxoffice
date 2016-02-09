@@ -28,8 +28,32 @@ include ('../templates/header.inc');
 				<div class="panel-heading">
 					<h3 class="panel-title"><i class="fa fa-eye fa-fw"></i>Quick Stats</h3>
 				</div>
-				<div class="panel-body">
-					
+				<div class="panel-body text-center">
+					<a href="#" class="btn btn-success">
+						<span class="bigger-150">0</span>
+						<br>
+						Tickets Sold
+					</a>
+					<a href="#" class="btn btn-info">
+						<span class="bigger-150">0</span>
+						<br>
+						Tickets Remaining
+					</a>
+					<a href="#" class="btn btn-success">
+						<span class="bigger-150">0</span>
+						<br>
+						Paid Orders
+					</a>
+					<a href="#" class="btn btn-warning">
+						<span class="bigger-150">0</span>
+						<br>
+						Unpaid Orders
+					</a>
+					<a href="#" class="btn btn-danger">
+						<span class="bigger-150">0</span>
+						<br>
+						Ungenerated Tickets
+					</a>
 				</div>
 			</div>
 		</div>

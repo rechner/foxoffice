@@ -25,7 +25,7 @@ ToDo
 	- No email based password reset
 	
 - Dashboard 
-	- Quick Stats for number of orders, unpaid orders, orders without generated tickets, number of open seats
+	- [ADDED PLACEHOLDERS] Quick Stats for number of orders, unpaid orders, orders without generated tickets, number of open seats
 	- 
 	
 - Settings file
