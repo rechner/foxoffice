@@ -16,8 +16,8 @@
 					</a>
 				</div>
 				<ul class="nav navbar-nav">
-					<li<?php if ($_SERVER['SCRIPT_NAME'] == "/index.php") echo ' class="active"';?>><a href="index.php">Dashboard</a></li>
-					<li<?php if ($_SERVER['SCRIPT_NAME'] == "/user.php") echo ' class="active"';?>><a href="user.php">Users</a></li>
+					<li<?php if ($_SERVER['SCRIPT_NAME'] == "/index.php") echo ' class="active"';?>><a href="index.php"><i class="fa fa-tachometer"></i> Dashboard</a></li>
+					<li<?php if ($_SERVER['SCRIPT_NAME'] == "/user.php") echo ' class="active"';?>><a href="user.php"><i class="fa fa-users"></i> Users</a></li>
 				</ul>
 				<ul class="nav navbar-nav navbar-right">
 					<li class="dropdown">
