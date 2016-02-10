@@ -124,7 +124,7 @@ function send_email($to, $subject, $message)
     $host = "ssl://smtp.zoho.com";
     $port = "465";
     $username = "noreply@hamfurs.org";
-    $password = "JuRl08jr2ld5EbSS";
+    $password = "password"; //change to real password
 
     $headers = array ('From' => $from,
       'To' => $to,
