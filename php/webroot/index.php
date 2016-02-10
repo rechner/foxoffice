@@ -8,20 +8,20 @@ if(!login_check($pdo)){
 }
 
 // Generate Stats
-	$query = $pdo->prepare("SELECT SUM(seats) AS totalsold FROM orders WHERE status = '1' OR status = '2'");
+	$query = $pdo->prepare("SELECT SUM(seats) AS totalorders FROM orders WHERE status = '1' OR status = '2'");
 	$query->execute();
 	$result = $query->fetch();
-	$totalsold = $result['totalorders'];
+	$totalorders = $result['totalorders'];
 
-	$query = $pdo->prepare("SELECT SUM(seats) AS totalsold FROM orders WHERE status = '2'");
+	$query = $pdo->prepare("SELECT SUM(seats) AS totalunpaid FROM orders WHERE status = '2'");
 	$query->execute();
 	$result = $query->fetch();
-	$totalsold = $result['totalunpaid'];
+	$totalunpaid = $result['totalunpaid'];
 
-	$query = $pdo->prepare("SELECT SUM(seats) AS totalsold FROM orders WHERE status = '1'");
+	$query = $pdo->prepare("SELECT SUM(seats) AS totalpaid FROM orders WHERE status = '1'");
 	$query->execute();
 	$result = $query->fetch();
-	$totalsold = $result['totalpaid'];
+	$totalpaid = $result['totalpaid'];
 	
 	
 
