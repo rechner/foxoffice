@@ -100,7 +100,7 @@ function login_check($dbh) {
 
 function show_notices()
 {
-    if (in_array('notices', $_SESSION) and $_SESSION['notices'])
+    if (in_array('notices', $_SESSION) && $_SESSION['notices'])
     {
         foreach ($_SESSION['notices'] as $notice)
         {
