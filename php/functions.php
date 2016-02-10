@@ -1,5 +1,6 @@
 <?php
 define('SALT_LENGTH', 32);
+define('TOTAL_SEATS', 151);
 
 function sec_session_start() {
         $session_name = 'sec_session_id'; // Set a custom session name

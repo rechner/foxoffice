@@ -7,6 +7,24 @@ if(!login_check($pdo)){
     exit();
 }
 
+// Generate Stats
+	$query = $pdo->prepare("SELECT SUM(seats) AS totalsold FROM orders WHERE status = '1' OR status = '2'");
+	$query->execute();
+	$result = $query->fetch();
+	$totalsold = $result['totalorders'];
+
+	$query = $pdo->prepare("SELECT SUM(seats) AS totalsold FROM orders WHERE status = '2'");
+	$query->execute();
+	$result = $query->fetch();
+	$totalsold = $result['totalunpaid'];
+
+	$query = $pdo->prepare("SELECT SUM(seats) AS totalsold FROM orders WHERE status = '1'");
+	$query->execute();
+	$result = $query->fetch();
+	$totalsold = $result['totalpaid'];
+	
+	
+
 if (isset($_FILES['csv'])) {
     $errors = array();
     $file_ext = strtolower(end(explode('.', $_FILES['csv']['name'])));
@@ -68,22 +86,38 @@ include ('../templates/header.inc');
                     </div>
                     <div class="panel-body text-center">
                         <a href="#" class="btn btn-success">
-                            <span class="bigger-150">0</span>
+                        	<span class="bigger-150">
+								<?php 
+									echo $totalorders;
+								?>
+							</span>
                             <br>
-                            Tickets Sold
+                            Total Orders
                         </a>
                         <a href="#" class="btn btn-info">
-                            <span class="bigger-150">0</span>
+                            <span class="bigger-150">
+                            	<?php 
+                            		echo TOTAL_SEATS - $totalsold; 
+                            	?>
+                            </span>
                             <br>
                             Tickets Remaining
                         </a>
                         <a href="#" class="btn btn-success">
-                            <span class="bigger-150">0</span>
+                            <span class="bigger-150">
+								<?php 
+									echo $totalpaid;
+								?>
+							</span>
                             <br>
                             Paid Orders
                         </a>
                         <a href="#" class="btn btn-warning">
-                            <span class="bigger-150">0</span>
+                            <span class="bigger-150">
+								<?php 
+									echo $totalunpaid;
+								?>
+							</span>
                             <br>
                             Unpaid Orders
                         </a>
