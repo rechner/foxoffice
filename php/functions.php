@@ -24,8 +24,8 @@ function generate_hash($password, $salt = null) {
     return $salt . hash('sha512', $salt . $password);                   //return the sha512'd password appended to the end of the hash
 }
 
-function login($username, $password, $pdo) {
-    if ($query = $pdo->prepare("SELECT uid, username, password FROM accounts WHERE username = ? LIMIT 1")) {
+function login($username, $password, $dbh) {
+    if ($query = $dbh->prepare("SELECT uid, username, password FROM accounts WHERE username = ? LIMIT 1")) {
         $query->bindValue(1, $username); // Bind "$username" to parameter.
 
         $query->execute(); // Execute the prepared query.
@@ -60,7 +60,7 @@ function login($username, $password, $pdo) {
     }
 }
 
-function login_check($pdo) {
+function login_check($dbh) {
     // Check if all session variables are set
     if(isset($_SESSION['user_id'], $_SESSION['username'], $_SESSION['login_string'])) {
         $user_id = $_SESSION['user_id'];
@@ -69,7 +69,7 @@ function login_check($pdo) {
         $ip_address = $_SERVER['REMOTE_ADDR']; // Get the IP address of the user.
         $user_browser = $_SERVER['HTTP_USER_AGENT']; // Get the user-agent string of the user.
 
-        if($query = $pdo->prepare("SELECT password FROM accounts WHERE uid = ? LIMIT 1")) {
+        if($query = $dbh->prepare("SELECT password FROM accounts WHERE uid = ? LIMIT 1")) {
             $query->bindValue(1, $user_id); // Bind "$user_id" to parameter.
             $query->execute(); // Execute the prepared query.
             $result = $query->fetch();
