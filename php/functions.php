@@ -152,7 +152,7 @@ function generate_ticket($name, $code, $current=1, $seats=1, $outfile='') {
     $canvas = imagecreatetruecolor(900, 450);
     imagefill($canvas, 0, 0, imagecolorallocate($canvas, 255, 255, 255));
     $qrcode = imagecreatefrompng("http://www.barcodes4.me/barcode/qr/file.png?value=$code&eccLevel=3&size=8");
-    $barcode = imagecreatefrompng("http://www.barcodes4.me/barcode/c128b/$code.png?widteader450&height=100&IsTextDrawn=1");
+    $barcode = imagecreatefrompng("http://www.barcodes4.me/barcode/c128b/$code.png?width=450&height=100&IsTextDrawn=1");
     $novafurs = imagecreatefrompng('images/novafurs.png');
     $mdfurs = imagecreatefromgif('images/marylandfurs.gif');
     # Draw background image 1.png - 8.png

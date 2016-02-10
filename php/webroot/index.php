@@ -8,42 +8,42 @@ if(!login_check($pdo)){
 }
 
 // Generate Stats
-	$query = $pdo->prepare("SELECT SUM(seats) AS totalorders FROM orders WHERE status = '1' OR status = '2'");
-	$query->execute();
-	$result = $query->fetch();
-	if ($result) {
-		$totalorders = $result['totalorders'];
-	} else {
-		$totalorders = 0;
-	}
+    $query = $pdo->prepare("SELECT SUM(seats) AS totalorders FROM orders WHERE status = '1' OR status = '2'");
+    $query->execute();
+    $result = $query->fetch();
+    if ($result) {
+        $totalorders = $result['totalorders'];
+    } else {
+        $totalorders = 0;
+    }
 
-	$query = $pdo->prepare("SELECT SUM(seats) AS totalunpaid FROM orders WHERE status = '2'");
-	$query->execute();
-	$result = $query->fetch();
-	if ($result) {
-		$totalunpaid = $result['totalunpaid'];
-	} else {
-		$totalunpaid = 0;
-	}
+    $query = $pdo->prepare("SELECT SUM(seats) AS totalunpaid FROM orders WHERE status = '2'");
+    $query->execute();
+    $result = $query->fetch();
+    if ($result) {
+        $totalunpaid = $result['totalunpaid'];
+    } else {
+        $totalunpaid = 0;
+    }
 
-	$query = $pdo->prepare("SELECT SUM(seats) AS totalpaid FROM orders WHERE status = '1'");
-	$query->execute();
-	$result = $query->fetch();
-	if ($result) {
-		$totalpaid = $result['totalpaid'];
-	} else {
-		$totalpaid = 0;
-	};
-	
-	$query = $pdo->prepare("SELECT SUM(CASE WHEN emailed=0 THEN 1 ELSE 0 END) AS ungenerated FROM orders");
-	$query->execute();
-	$result = $query->fetch();
-	if ($result) {
-		$ungenerated = $result['ungenerated'];
-	} else {
-		$ungenerated = 0;
-	}
-	
+    $query = $pdo->prepare("SELECT SUM(seats) AS totalpaid FROM orders WHERE status = '1'");
+    $query->execute();
+    $result = $query->fetch();
+    if ($result) {
+        $totalpaid = $result['totalpaid'];
+    } else {
+        $totalpaid = 0;
+    };
+
+    $query = $pdo->prepare("SELECT SUM(CASE WHEN emailed=0 THEN 1 ELSE 0 END) AS ungenerated FROM orders");
+    $query->execute();
+    $result = $query->fetch();
+    if ($result) {
+        $ungenerated = $result['ungenerated'];
+    } else {
+        $ungenerated = 0;
+    }
+
 
 if (isset($_FILES['csv'])) {
     $errors = array();
@@ -56,7 +56,7 @@ if (isset($_FILES['csv'])) {
     if (empty($errors) == true) {
         try {
             $csv_data = process_csv($_FILES['csv']['tmp_name']);
-            //$report = import_csv_data($csv_data);
+            $report = import_csv_data($csv_data);
 
             # Status is 'Approved':
                 # Person exists in `people` table:
@@ -107,47 +107,47 @@ include ('../templates/header.inc');
                     </div>
                     <div class="panel-body text-center">
                         <a href="#" class="btn btn-success">
-                        	<span class="bigger-150">
-								<?php 
-									echo $totalorders;
-								?>
-							</span>
+                            <span class="bigger-150">
+                                <?php
+                                    echo $totalorders;
+                                ?>
+                            </span>
                             <br>
                             Total Orders
                         </a>
                         <a href="#" class="btn btn-info">
                             <span class="bigger-150">
-                            	<?php 
-                            		echo TOTAL_SEATS - $totalorders; 
-                            	?>
+                                <?php
+                                    echo TOTAL_SEATS - $totalorders;
+                                ?>
                             </span>
                             <br>
                             Tickets Remaining
                         </a>
                         <a href="#" class="btn btn-success">
                             <span class="bigger-150">
-								<?php 
-									echo $totalpaid;
-								?>
-							</span>
+                                <?php
+                                    echo $totalpaid;
+                                ?>
+                            </span>
                             <br>
                             Paid Orders
                         </a>
                         <a href="#" class="btn btn-warning">
                             <span class="bigger-150">
-								<?php 
-									echo $totalunpaid;
-								?>
-							</span>
+                                <?php
+                                    echo $totalunpaid;
+                                ?>
+                            </span>
                             <br>
                             Unpaid Orders
                         </a>
                         <a href="#" class="btn btn-danger">
                             <span class="bigger-150">
-								<?php 
-									echo $ungenerated;
-								?>
-							</span>
+                                <?php
+                                    echo $ungenerated;
+                                ?>
+                            </span>
                             <br>
                             Ungenerated Tickets
                         </a>
