@@ -253,7 +253,7 @@ function import_csv_data($csv_data) {
     # Remove row from `people`
     #
 
-    return array(success => $report, errors => $error_report);
+    return array("success" => $report, "errors" => $error_report);
 
 }
 
