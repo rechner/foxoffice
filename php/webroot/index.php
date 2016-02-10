@@ -23,6 +23,10 @@ if(!login_check($pdo)){
 	$result = $query->fetch();
 	$totalpaid = $result['totalpaid'];
 	
+	$query = $pdo->prepare("SELECT SUM(CASE WHEN emailed=0 THEN 1 ELSE 0 END) AS ungenerated FROM orders");
+	$query->execute();
+	$result = $query->fetch();
+	$ungenerated = $result['ungenerated'];
 	
 
 if (isset($_FILES['csv'])) {
@@ -97,7 +101,7 @@ include ('../templates/header.inc');
                         <a href="#" class="btn btn-info">
                             <span class="bigger-150">
                             	<?php 
-                            		echo TOTAL_SEATS - $totalsold; 
+                            		echo TOTAL_SEATS - $totalorders; 
                             	?>
                             </span>
                             <br>
@@ -122,7 +126,11 @@ include ('../templates/header.inc');
                             Unpaid Orders
                         </a>
                         <a href="#" class="btn btn-danger">
-                            <span class="bigger-150">0</span>
+                            <span class="bigger-150">
+								<?php 
+									echo $ungenerated;
+								?>
+							</span>
                             <br>
                             Ungenerated Tickets
                         </a>
