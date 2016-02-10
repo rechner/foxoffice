@@ -1,12 +1,14 @@
 body {
-	padding-top: 70px;
+    padding-top: 70px;
+    padding-left: 10px;
+    padding-right: 10px;
 }
 
 #no-nav body {
-	padding-top: 0px;
+    padding-top: 0px;
 }
 
 .alert-dismissible {
-	margin-left: 20px;
-	margin-right: 20px;
+    margin-left: 20px;
+    margin-right: 20px;
 }

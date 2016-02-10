@@ -151,7 +151,7 @@ function generate_ticket($name, $code, $current=1, $seats=1, $outfile='') {
     $canvas = imagecreatetruecolor(900, 450);
     imagefill($canvas, 0, 0, imagecolorallocate($canvas, 255, 255, 255));
     $qrcode = imagecreatefrompng("http://www.barcodes4.me/barcode/qr/file.png?value=$code&eccLevel=3&size=8");
-    $barcode = imagecreatefrompng("http://www.barcodes4.me/barcode/c128b/$code.png?width=450&height=100&IsTextDrawn=1");
+    $barcode = imagecreatefrompng("http://www.barcodes4.me/barcode/c128b/$code.png?widteader450&height=100&IsTextDrawn=1");
     $novafurs = imagecreatefrompng('images/novafurs.png');
     $mdfurs = imagecreatefromgif('images/marylandfurs.gif');
     # Draw background image 1.png - 8.png
@@ -184,19 +184,19 @@ function generate_ticket($name, $code, $current=1, $seats=1, $outfile='') {
 
 class CSVException extends Exception { }
 
-function process_csv($acsv_string) {
+function process_csv($csv_string) {
   // Process the CSV into an array of associative arrays, using
   // the first row headers as keys.
   $rows = array_map('str_getcsv', file($csv_string));
 
   // Ignore rows that are only one column (which the events plugin helpfully adds)
   do {
-    $header = array_shift($rows);
-  } while ((sizeof($header) > 1) or ($array[1] === ''));
+      $header = array_shift($rows);
+  } while ($header[1] === '');
 
   if (!(in_array('Name', $header, true) and
         in_array('Spaces', $header, true) and
-        in_array('Email', $header, true) and
+        in_array('E-mail', $header, true) and
         in_array('Status', $header, true))) {
     throw new CSVException('Expected headers were not found');
   }
@@ -207,6 +207,54 @@ function process_csv($acsv_string) {
   }
 
   return $csv;
+}
+
+function import_csv_data($csv_data) {
+    $csv_data = process_csv($_FILES['csv']['tmp_name']);
+    $success_list = array();
+    $error_list = array();
+    $report = "<ul>";
+
+    # Loop through each row, check if person is in `people` table
+    foreach ($csv_data as $row) {
+       $email = $row['E-mail'];
+       $row['Name'] = stripcslashes($row['Name']);
+
+       if ($row['Status'] === 'Approved') {
+           $success_list[] = $row;
+           $status = '<span class="label label-success">' . $row['Status'] . "</span>";
+           $report .= "<li>$status <span class=\"badge\">$row[Spaces]</span> $row[Name] &lt;$email&gt;</li>";
+       } else {
+           $error_list[] = $row;
+       }
+    }
+
+    $report .= "</ul>";
+
+    $error_report = "<ul>";
+    foreach ($error_list as $row) {
+       $email = $row['E-mail'];
+       $status = '<span class="label label-danger">' . $row['Status'] . "</span>";
+       $error_report .= "<li>$status <span class=\"badge\">$row[Spaces]</span> $row[Name] &lt;$email&gt;</li>";
+    }
+    $error_report .= "</ul>";
+
+    # Status is 'Approved':
+    # Person exists in `people` table:
+    # Check that person has correct number of seats (both rows and `tickets.seats`)
+    # Generate more if needed
+    # Email ticket PDF
+    # ELSE person does not exist:
+    # Add to `people` table, generate ticket codes and row
+    # Email ticket PDF
+    # Status is 'Cancelled':
+    # Person exists in `people` table:
+    # Remove associated rows from `tickets`
+    # Remove row from `people`
+    #
+
+    return array(success => $report, errors => $error_report);
+
 }
 
 ?>
