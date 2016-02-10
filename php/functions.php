@@ -188,7 +188,7 @@ class CSVException extends Exception { }
 function process_csv($csv_string) {
   // Process the CSV into an array of associative arrays, using
   // the first row headers as keys.
-  $rows = array_map('str_getcsv', file($csv_string));
+  $rows = array_map('str_getcsv', file($csv_string)); // <----- This isnt doing anything
 
   // Ignore rows that are only one column (which the events plugin helpfully adds)
   do {

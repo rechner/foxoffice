@@ -47,7 +47,8 @@ if(!login_check($pdo)){
 
 if (isset($_FILES['csv'])) {
     $errors = array();
-    $file_ext = strtolower(end(explode('.', $_FILES['csv']['name'])));
+    $filename = explode('.', $_FILES['csv']['name']);
+    $file_ext = strtolower(end($filename));
     if ($file_ext !== 'csv') {
         $errors[] = "File extension must be CSV.";
     }
@@ -55,7 +56,7 @@ if (isset($_FILES['csv'])) {
     if (empty($errors) == true) {
         try {
             $csv_data = process_csv($_FILES['csv']['tmp_name']);
-            $report = import_csv_data($csv_data);
+            //$report = import_csv_data($csv_data);
 
             # Status is 'Approved':
                 # Person exists in `people` table:
