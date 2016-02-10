@@ -12,3 +12,7 @@ body {
     margin-left: 20px;
     margin-right: 20px;
 }
+
+.bigger-150 {
+	font-size: 150%;
+}

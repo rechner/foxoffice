@@ -1,5 +1,6 @@
 <?php
 define('SALT_LENGTH', 32);
+define('TOTAL_SEATS', 151);
 
 function sec_session_start() {
         $session_name = 'sec_session_id'; // Set a custom session name
@@ -124,7 +125,7 @@ function send_email($to, $subject, $message)
     $host = "ssl://smtp.zoho.com";
     $port = "465";
     $username = "noreply@hamfurs.org";
-    $password = "JuRl08jr2ld5EbSS";
+    $password = "password"; //change to real password
 
     $headers = array ('From' => $from,
       'To' => $to,
@@ -187,7 +188,7 @@ class CSVException extends Exception { }
 function process_csv($csv_string) {
   // Process the CSV into an array of associative arrays, using
   // the first row headers as keys.
-  $rows = array_map('str_getcsv', file($csv_string));
+  $rows = array_map('str_getcsv', file($csv_string)); // <----- This isnt doing anything
 
   // Ignore rows that are only one column (which the events plugin helpfully adds)
   do {
