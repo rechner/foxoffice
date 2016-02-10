@@ -29,7 +29,23 @@ include ('../templates/header.inc');
                     <h3 class="panel-title"><i class="fa fa-users fa-fw"></i>Users</h3>
                 </div>
                 <div class="panel-body">
-                    :U
+                    <table class="table">
+                    	<tr>
+							<th>Username</th>
+							<th class="text-center">Change Password</th>
+							<th class="text-center">Delete User</th>
+						</tr>
+							<?php 
+								$query = $pdo->prepare("SELECT uid, username FROM accounts");
+
+								$query->execute();
+								$result = $query->fetchAll(PDO::FETCH_ASSOC);
+								foreach ($result as $row) {
+									echo "<input type=\"hidden\" name=\"uid\" id=\"uid\" value=\"{$row['uid']}\"";
+									echo "\n\t\t\t\t<tr>\n\t\t\t\t\t<td>{$row['username']}</td>\n\t\t\t\t\t<td class=\"text-center\"><a href=\"#\" class=\"btn btn-warning\"><i class=\"fa fa-key fa-fw\"></td>\n\t\t\t\t\t<td class=\"text-center\"><a href=\"#\" class=\"btn btn-danger\"><i class=\"fa fa-user-times fa-fw\"></td>\n\t\t\t\t</tr>\n";
+								}
+							?>
+                    </table>
                 </div>
             </div>
         </div>
