@@ -29,7 +29,7 @@ include ('../templates/header.inc');
                     <h3 class="panel-title"><i class="fa fa-users fa-fw"></i>Users</h3>
                 </div>
                 <div class="panel-body">
-                    <table class="table">
+                    <table class="table table-hover">
                     	<tr>
 							<th>Username</th>
 							<th class="text-center">Change Password</th>
