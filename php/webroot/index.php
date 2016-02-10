@@ -11,22 +11,38 @@ if(!login_check($pdo)){
 	$query = $pdo->prepare("SELECT SUM(seats) AS totalorders FROM orders WHERE status = '1' OR status = '2'");
 	$query->execute();
 	$result = $query->fetch();
-	$totalorders = $result['totalorders'];
+	if ($result) {
+		$totalorders = $result['totalorders'];
+	} else {
+		$totalorders = 0;
+	}
 
 	$query = $pdo->prepare("SELECT SUM(seats) AS totalunpaid FROM orders WHERE status = '2'");
 	$query->execute();
 	$result = $query->fetch();
-	$totalunpaid = $result['totalunpaid'];
+	if ($result) {
+		$totalunpaid = $result['totalunpaid'];
+	} else {
+		$totalunpaid = 0;
+	}
 
 	$query = $pdo->prepare("SELECT SUM(seats) AS totalpaid FROM orders WHERE status = '1'");
 	$query->execute();
 	$result = $query->fetch();
-	$totalpaid = $result['totalpaid'];
+	if ($result) {
+		$totalpaid = $result['totalpaid'];
+	} else {
+		$totalpaid = 0;
+	};
 	
 	$query = $pdo->prepare("SELECT SUM(CASE WHEN emailed=0 THEN 1 ELSE 0 END) AS ungenerated FROM orders");
 	$query->execute();
 	$result = $query->fetch();
-	$ungenerated = $result['ungenerated'];
+	if ($result) {
+		$ungenerated = $result['ungenerated'];
+	} else {
+		$ungenerated = 0;
+	}
 	
 
 if (isset($_FILES['csv'])) {
