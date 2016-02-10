@@ -146,7 +146,6 @@ function send_email($to, $subject, $message)
     }
 }
 
-
 function generate_ticket($name, $code, $current=1, $seats=1, $outfile='') {
     $name = stripcslashes($name);
     $canvas = imagecreatetruecolor(900, 450);
@@ -181,6 +180,71 @@ function generate_ticket($name, $code, $current=1, $seats=1, $outfile='') {
     #  imagepng($canvas, $outfile);
     #}
     return $canvas;
+}
+
+function insert_db_row($dbh, $row) {
+    $name = $row['Name'];
+    $email = $row['E-mail'];
+
+    # check if they are in the people table first
+    $pid = person_exists($dbh, $name, $email);
+    if (is_null($pid)) {
+        $pid = insert_person($dbh, $name, $email);
+    }
+
+    # check number of tickets
+    $tickets = get_tickets($dbh, $pid);
+    if (count($tickets) != $row['Spaces']) {
+        # Delete and regenerate all tickets
+        delete_tickets($dbh, $pid);
+        generate_tickets($dbh, $pid, $row);
+    }
+
+    # Return something useful to indicate what we just did
+}
+
+function generate_tickets($dhb, $person_id, $row) {
+    $name = $row['Name'];
+    $spaces = $row['Spaces'];
+
+    # Generate code for each space
+    # Generate ticket graphic for each space
+    # Generate PDF and cache it to be emailed out
+}
+
+function get_tickets($dbh, $person_id) {
+    $sth = $dbh->prepare("SELECT * FROM `tickets` WHERE `pid` = ?;");
+    $sth->execute(array($person_id));
+    return $sth->fetchAll();
+}
+
+function delete_tickets($dbh, $person_id) {
+    $sth = $dbh->prepare("DELETE FROM `tickets` WHERE `pid` = ?;");
+    return $sth->execute(array($person_id));
+}
+
+function get_person($dbh, $person_id) {
+    $sth = $dbh->prepare("SELECT * FROM `people` WHERE `pid` = ?;");
+    $sth->execute(array($person_id));
+    return $sth->fetchAll();
+}
+
+function person_exists($dbh, $name, $email) {
+    $sth = $dbh->prepare("SELECT `pid` FROM `people` WHERE `name` = ? AND `email` = ?;");
+    $sth->execute(array($name, $email));
+    $result = $sth->fetch();
+    if ($result) {
+        return $result['pid'];
+    } else {
+        return null;
+    }
+}
+
+# Returns the ID of the person inserted
+function insert_person($dbh, $name, $email) {
+    $sth = $dbh->prepare("INSERT INTO `people`(`name`, `email`) VALUES (?, ?);");
+    $sth->execute(array($name, $email));
+    return $sth->lastInsertId();
 }
 
 class CSVException extends Exception { }

@@ -48,12 +48,13 @@ def get_statuses(db):
 
 def search_ticket(query):
     db = get_db()
-    cur = db.execute("SELECT * FROM `tickets` WHERE `hash` = ?", (query,))
+    cur = db.execute("SELECT * FROM `tickets` WHERE `ticketnumber` = ?", (query,))
     tickets = cur.fetchone()
     if tickets is None:
         return None
     tickets = dict(tickets)
-    tickets['person'] = get_person(tickets['pid'])
+    tickets['order'] = get_order(tickets['oid'])
+    tickets['person'] = get_person(tickets['order']['pid'])
     tickets['status_id'] = tickets['status']
     tickets['status'] = g.status_table[tickets['status']]
     checkin_ticket(tickets['tid'])
@@ -66,6 +67,14 @@ def get_person(id):
     if person is None:
         return None
     return dict(person)
+
+def get_order(id):
+    db = get_db()
+    cur = db.execute("SELECT * FROM `orders` WHERE `oid` = ?", (id,))
+    order = cur.fetchone()
+    if order is None:
+        return None
+    return dict(order)
 
 def checkin_ticket(tid):
     db = get_db()
