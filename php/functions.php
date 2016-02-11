@@ -1,6 +1,7 @@
 <?php
 define('SALT_LENGTH', 32);
 define('TOTAL_SEATS', 151);
+date_default_timezone_set('America/New_York');
 
 function sec_session_start() {
         $session_name = 'sec_session_id'; // Set a custom session name
@@ -146,7 +147,7 @@ function send_email($to, $subject, $message)
     }
 }
 
-function generate_ticket($name, $code, $current=1, $seats=1, $outfile='') {
+function generate_ticket_image($name, $code, $current=1, $seats=1, $outfile='') {
     $name = stripcslashes($name);
     $canvas = imagecreatetruecolor(900, 450);
     imagefill($canvas, 0, 0, imagecolorallocate($canvas, 255, 255, 255));
@@ -170,12 +171,12 @@ function generate_ticket($name, $code, $current=1, $seats=1, $outfile='') {
         $seats_message = "$current Seat";
     }
     $grey = imagecolorallocate($canvas, 80, 80, 80);
-    imagettftext($canvas, 40, 0, 40, 400, 0, 'fonts/FreeMono.otf', $code_formatted);
-    imagettftext($canvas, 35, 0, 40, 170, $grey, 'fonts/FreeSansBold.otf', 'Zootopia');
-    imagettftext($canvas, 18, 0, 270, 150, $grey, 'fonts/FreeSans.otf', 'March 5, 2016');
-    imagettftext($canvas, 18, 0, 270, 170, $grey, 'fonts/FreeSans.otf', '11:00');
-    imagettftext($canvas, 18, 0, 40, 240, 0, 'fonts/FreeSansBold.otf', "$name\n$seats_message");
-    imagettftext($canvas, 12, 0, 40, 430, 0, 'fonts/FreeMono.otf', 'Generated ' . date(DateTime::ISO8601));
+    imagettftext($canvas, 40, 0, 40, 400, 0, 'font/FreeMono.otf', $code_formatted);
+    imagettftext($canvas, 35, 0, 40, 170, $grey, 'font/FreeSansBold.otf', 'Zootopia');
+    imagettftext($canvas, 18, 0, 270, 150, $grey, 'font/FreeSans.otf', 'March 5, 2016');
+    imagettftext($canvas, 18, 0, 270, 170, $grey, 'font/FreeSans.otf', '11:00');
+    imagettftext($canvas, 18, 0, 40, 240, 0, 'font/FreeSansBold.otf', "$name\n$seats_message");
+    imagettftext($canvas, 12, 0, 40, 430, 0, 'font/FreeMono.otf', 'Generated ' . date(DateTime::ISO8601));
     #if ($outfile !== '') {
     #  imagepng($canvas, $outfile);
     #}
@@ -197,15 +198,82 @@ function insert_db_row($dbh, $row) {
     if (count($tickets) != $row['Spaces']) {
         # Delete and regenerate all tickets
         delete_tickets($dbh, $pid);
-        generate_tickets($dbh, $pid, $row);
+        generate_tickets_pdf($dbh, $pid, $row);
     }
 
     # Return something useful to indicate what we just did
 }
 
-function generate_tickets($dhb, $person_id, $row) {
-    $name = $row['Name'];
-    $spaces = $row['Spaces'];
+function generate_tickets_pdf($dhb, $order) {
+    require('fpdf.php');
+    //retreive order details
+    $query = $pdo->prepare("SELECT orders.seats, orders.status, people.name, people.email FROM orders LEFT OUTER JOIN people ON orders.pid = people.pid WHERE oid = ?;");
+    $query->bindValue(1, $order, PDO::PARAM_INT);
+    $query->execute();
+    $result = $query->fetch();
+
+    $name = $result['name'];
+    $email = $result['email'];
+    $seats = $result['seats'];
+    $orderstatus = $result['status'];
+
+    if ($orderstatus = 1) {
+        $pagecount = ceil((($seats-2)/3)+1);
+
+        function PutLink($pdf, $text, $URL) {
+            $pdf->SetFont('', 'U');
+            $pdf->SetTextColor(0, 0, 255);
+            $pdf->Write(5, $text, $URL);
+            $pdf->SetFont('', '');
+            $pdf->SetTextColor(0);
+        }
+
+        //Generate page 1
+        $pdf = new PDF_Generator();
+
+        $pdf->AddPage();
+        $pdf->SetFont('helvetica', '', 12);
+        $pdf->SetY(25);
+        #$pdf->SetX(25);
+        #$pdf->Cell(15);
+        $pdf->SetLeftMargin(25);
+
+        $pdf->Image('images/alamo-30.png', 30, 60, 70, 0);
+
+        $pdf->Write(5, "Present this ticket at the registration table to receive your $15 Alamo food gift card.\n");
+        $pdf->Ln();
+
+        #$pdf->SetX(25);
+        $pdf->SetFont('', 'B');
+        $pdf->Write(5, 'Where: ');
+        PutLink($pdf, 'One Loudoun, 20575 Easthampton Plaza, Ashburn, VA 20147', 'https://www.google.com/maps/place/Alamo+Drafthouse+Cinema/@39.0477854,-77.4656295,14z/data=!4m2!3m1!1s0x0:0x3fda98f8c48cb5aa');
+        $pdf->Ln();
+
+        $pdf->SetFont('', 'B');
+        $pdf->Write(5, 'When: ');
+        $pdf->SetFont('', '');
+        $pdf->Write(5, "Saturday, March 5th @ 11:00\n\n");
+
+        $pdf->SetFont('', '', 10);
+        $pdf->Write(5, "Please arrive 15 minutes before the showtime to
+        select a seat and take a look at the menu.  You
+        might not be seated if you arrive after the showtime.
+        Alamo has a strict no talking/texting policy. Noisy
+        tables get one warning before being ejected from
+        the theatre.
+
+        Fursuits have been approved inside the Alamo,
+        however was not approved by the property owners.
+        As such we ask that fursuits be worn indoors only,
+        but note that there is no dedicated changing
+        areas.
+        ");
+
+        $pdf->Image('images/map.png', 110, 50, 80, 0, '', 'https://www.google.com/maps/place/Alamo+Drafthouse+Cinema/@39.0477854,-77.4656295,14z/data=!4m2!3m1!1s0x0:0x3fda98f8c48cb5aa');
+
+            //impossible
+
+    }
 
     # Generate code for each space
     # Generate ticket graphic for each space
