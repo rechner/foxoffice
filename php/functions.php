@@ -147,6 +147,42 @@ function send_email($to, $subject, $message)
     }
 }
 
+function generate_reg_code() {
+    $i = 0;
+    $lastvalue = '';
+    $newstring = '';
+    $lengthofstring = 12;
+    while($i < $lengthofstring ) {
+        $part = rand(1,4);
+        switch($part) {
+            case 1:
+                $a=50;$b=57;      // Numbers 2-9
+                break;
+            case 2:
+                $a=65;$b=72;      // Uppercase Letters A-H
+                break;
+            case 3:
+                $a=74;$b=78;      // Uppercase Letters J-N (disallow I and O)
+                break;
+            case 4:
+                $a=80;$b=90;      // Uppercase letters P-Z
+                break;
+        }
+
+        $value=rand($a,$b);
+        while($value==$lastvalue){    // Disallow repeating characters
+            $value=rand($a,$b);
+        }
+        $code_part=chr($value);
+        $lastvalue=$value;
+
+        $i++;
+        $newstring = $newstring.$code_part;
+    }
+    return $newstring;
+}
+
+
 function generate_ticket_image($name, $code, $current=1, $seats=1, $outfile='') {
     $name = stripcslashes($name);
     $canvas = imagecreatetruecolor(900, 450);
@@ -177,9 +213,10 @@ function generate_ticket_image($name, $code, $current=1, $seats=1, $outfile='') 
     imagettftext($canvas, 18, 0, 270, 170, $grey, 'font/FreeSans.otf', '11:00');
     imagettftext($canvas, 18, 0, 40, 240, 0, 'font/FreeSansBold.otf', "$name\n$seats_message");
     imagettftext($canvas, 12, 0, 40, 430, 0, 'font/FreeMono.otf', 'Generated ' . date(DateTime::ISO8601));
-    #if ($outfile !== '') {
-    #  imagepng($canvas, $outfile);
-    #}
+
+    if ($outfile !== '') {
+      imagepng($canvas, $outfile);
+    }
     return $canvas;
 }
 
@@ -191,6 +228,7 @@ function insert_db_row($dbh, $row) {
     $pid = person_exists($dbh, $name, $email);
     if (is_null($pid)) {
         $pid = insert_person($dbh, $name, $email);
+        $oid = insert_order($dbh, $pid, $row['Spaces'], '', 1, $pid);
     }
 
     # check number of tickets
@@ -198,92 +236,128 @@ function insert_db_row($dbh, $row) {
     if (count($tickets) != $row['Spaces']) {
         # Delete and regenerate all tickets
         delete_tickets($dbh, $pid);
-        generate_tickets_pdf($dbh, $pid, $row);
+        generate_tickets_pdf($dbh, $pid, $pid, $row);
     }
 
     # Return something useful to indicate what we just did
 }
 
-function generate_tickets_pdf($dhb, $order) {
-    require('fpdf.php');
-    //retreive order details
-    $query = $pdo->prepare("SELECT orders.seats, orders.status, people.name, people.email FROM orders LEFT OUTER JOIN people ON orders.pid = people.pid WHERE oid = ?;");
-    $query->bindValue(1, $order, PDO::PARAM_INT);
-    $query->execute();
-    $result = $query->fetch();
+function generate_tickets_pdf($dbh, $person_id, $order_id, $row) {
+    $ticket_graphics = array();
+    # Generate code for each space
+    for ($i = 1; $i <= $row['Spaces']; $i++) {
+        $ticket_number = '';
+        do {
+            $ticket_number = generate_reg_code();
+        } while (get_ticket_by_code($dbh, $ticket_number));
 
-    $name = $result['name'];
-    $email = $result['email'];
-    $seats = $result['seats'];
-    $orderstatus = $result['status'];
+        # Insert the ticket row into database
+        insert_ticket($dbh, $person_id, $ticket_number);
 
-    if ($orderstatus = 1) {
-        $pagecount = ceil((($seats-2)/3)+1);
-
-        function PutLink($pdf, $text, $URL) {
-            $pdf->SetFont('', 'U');
-            $pdf->SetTextColor(0, 0, 255);
-            $pdf->Write(5, $text, $URL);
-            $pdf->SetFont('', '');
-            $pdf->SetTextColor(0);
-        }
-
-        //Generate page 1
-        $pdf = new PDF_Generator();
-
-        $pdf->AddPage();
-        $pdf->SetFont('helvetica', '', 12);
-        $pdf->SetY(25);
-        #$pdf->SetX(25);
-        #$pdf->Cell(15);
-        $pdf->SetLeftMargin(25);
-
-        $pdf->Image('images/alamo-30.png', 30, 60, 70, 0);
-
-        $pdf->Write(5, "Present this ticket at the registration table to receive your $15 Alamo food gift card.\n");
-        $pdf->Ln();
-
-        #$pdf->SetX(25);
-        $pdf->SetFont('', 'B');
-        $pdf->Write(5, 'Where: ');
-        PutLink($pdf, 'One Loudoun, 20575 Easthampton Plaza, Ashburn, VA 20147', 'https://www.google.com/maps/place/Alamo+Drafthouse+Cinema/@39.0477854,-77.4656295,14z/data=!4m2!3m1!1s0x0:0x3fda98f8c48cb5aa');
-        $pdf->Ln();
-
-        $pdf->SetFont('', 'B');
-        $pdf->Write(5, 'When: ');
-        $pdf->SetFont('', '');
-        $pdf->Write(5, "Saturday, March 5th @ 11:00\n\n");
-
-        $pdf->SetFont('', '', 10);
-        $pdf->Write(5, "Please arrive 15 minutes before the showtime to
-        select a seat and take a look at the menu.  You
-        might not be seated if you arrive after the showtime.
-        Alamo has a strict no talking/texting policy. Noisy
-        tables get one warning before being ejected from
-        the theatre.
-
-        Fursuits have been approved inside the Alamo,
-        however was not approved by the property owners.
-        As such we ask that fursuits be worn indoors only,
-        but note that there is no dedicated changing
-        areas.
-        ");
-
-        $pdf->Image('images/map.png', 110, 50, 80, 0, '', 'https://www.google.com/maps/place/Alamo+Drafthouse+Cinema/@39.0477854,-77.4656295,14z/data=!4m2!3m1!1s0x0:0x3fda98f8c48cb5aa');
-
-            //impossible
-
+        # Generate ticket graphic for each space
+        $ticket_graphics[] = generate_ticket_image($row['Name'], $ticket_number, $current=$i, $seats=$row['Spaces']);
     }
 
-    # Generate code for each space
-    # Generate ticket graphic for each space
     # Generate PDF and cache it to be emailed out
+
+    require_once('pdf_lib.php');
+    $pdf = new PDF_Generator(); #FIXME: REUSE this instance to speed things up
+
+    $pdf->AddPage();
+    $pdf->SetFont('helvetica', '', 12);
+    $pdf->SetY(25);
+    #$pdf->SetX(25);
+    #$pdf->Cell(15);
+    $pdf->SetLeftMargin(25);
+
+
+    $pdf->Image('images/alamo-30.png', 30, 60, 70, 0);
+
+    $pdf->Write(5, "Present this ticket at the registration table to receive your $15 Alamo food gift card.\n");
+    $pdf->Ln();
+
+    #$pdf->SetX(25);
+    $pdf->SetFont('', 'B');
+    $pdf->Write(5, 'Where: ');
+    PutLink($pdf, 'One Loudoun, 20575 Easthampton Plaza, Ashburn, VA 20147', 'https://www.google.com/maps/place/Alamo+Drafthouse+Cinema/@39.0477854,-77.4656295,14z/data=!4m2!3m1!1s0x0:0x3fda98f8c48cb5aa');
+    $pdf->Ln();
+
+    $pdf->SetFont('', 'B');
+    $pdf->Write(5, 'When: ');
+    $pdf->SetFont('', '');
+    $pdf->Write(5, "Saturday, March 5th @ 11:00\n\n");
+
+    $pdf->SetFont('', '', 10);
+    $pdf->Write(5, "Please arrive 15 minutes before the showtime to
+select a seat and take a look at the menu.  You
+might not be seated if you arrive after the showtime.
+Alamo has a strict no talking/texting policy. Noisy
+tables get one warning before being ejected from
+the theatre.
+
+Fursuits have been approved inside the Alamo,
+however was not approved by the property owners.
+As such we ask that fursuits be worn indoors only,
+but note that there is no dedicated changing
+areas.
+");
+
+    $pdf->Image('images/map.png', 110, 50, 80, 0, '', 'https://www.google.com/maps/place/Alamo+Drafthouse+Cinema/@39.0477854,-77.4656295,14z/data=!4m2!3m1!1s0x0:0x3fda98f8c48cb5aa');
+
+    # First page:
+    $y_offset = 120;
+    for ($i = 0; $i < count($ticket_graphics); $i++) {
+        # We can fit two tickets on page 1
+        if ($i <= 1) {
+            $pdf->GDImage($ticket_graphics[$i], 35, $y_offset, 140);
+            $pdf->Line(25, $y_offset, 190, $y_offset);
+        } else {
+            # Pages 2 and onwards fit 3
+            if ((($i + 1) % 3) === 0) {
+                $pdf->AddPage();
+                $pdf->GDImage($ticket_graphics[$i], 35, 30, 140);
+                $y_offset = 30;
+            } else {
+                $pdf->GDImage($ticket_graphics[$i], 35, $y_offset, 140);
+                $pdf->Line(30, $y_offset, 180, $y_offset);
+            }
+        }
+        $y_offset += 70;
+    }
+
+    # Save the PDF for now
+    $pdf->Output("pdf/$person_id.pdf", 'F');
+
+    # Prevent memory leaks
+    foreach ($ticket_graphics as $ticket) {
+        imagedestroy($ticket);
+    }
+}
+
+function PutLink($pdf, $text, $URL) {
+    $pdf->SetFont('', 'U');
+    $pdf->SetTextColor(0, 0, 255);
+    $pdf->Write(5, $text, $URL);
+    $pdf->SetFont('', '');
+    $pdf->SetTextColor(0);
 }
 
 function get_tickets($dbh, $person_id) {
     $sth = $dbh->prepare("SELECT * FROM `tickets` WHERE `pid` = ?;");
     $sth->execute(array($person_id));
     return $sth->fetchAll();
+}
+
+function insert_ticket($dbh, $pid, $ticketnumber) {
+    $sth = $dbh->prepare("INSERT INTO `tickets`(`pid`, `ticketnumber`) VALUES (?, ?);");
+    $sth->execute(array($pid, $ticketnumber));
+    return $dbh->lastInsertId();
+}
+
+function get_ticket_by_code($dbh, $code) {
+    $sth = $dbh->prepare("SELECT * FROM `tickets` WHERE `ticketnumber` = ?;");
+    $sth->execute(array($code));
+    return $sth->fetch();
 }
 
 function delete_tickets($dbh, $person_id) {
@@ -312,7 +386,19 @@ function person_exists($dbh, $name, $email) {
 function insert_person($dbh, $name, $email) {
     $sth = $dbh->prepare("INSERT INTO `people`(`name`, `email`) VALUES (?, ?);");
     $sth->execute(array($name, $email));
-    return $sth->lastInsertId();
+    return $dbh->lastInsertId();
+}
+
+function insert_order($dbh, $person_id, $seats, $hash, $status, $filename) {
+    $sth = $dbh->prepare("INSERT INTO `orders`(`pid`, `seats`, `hash`, `status`, `filename`) VALUES (?,?,?,?,?);");
+    $sth->execute(array($person_id, $seats, $hash, $status, $filename));
+    return $dbh->lastInsertId();
+}
+
+function get_order($dbh, $order_id) {
+    $sth = $dbh->prepare("SELECT * FROM `orders` WHERE `oid` = ?;");
+    $sth->execute(array($order_id));
+    return $sth->fetch();
 }
 
 class CSVException extends Exception { }
@@ -342,7 +428,7 @@ function process_csv($csv_string) {
   return $csv;
 }
 
-function import_csv_data($csv_data) {
+function import_csv_data($dbh, $csv_data) {
     $csv_data = process_csv($_FILES['csv']['tmp_name']);
     $success_list = array();
     $error_list = array();
@@ -354,6 +440,8 @@ function import_csv_data($csv_data) {
        $row['Name'] = stripcslashes($row['Name']);
 
        if ($row['Status'] === 'Approved') {
+           insert_db_row($dbh, $row);
+
            $success_list[] = $row;
            $status = '<span class="label label-success">' . $row['Status'] . "</span>";
            $report .= "<li>$status <span class=\"badge\">$row[Spaces]</span> $row[Name] &lt;$email&gt;</li>";

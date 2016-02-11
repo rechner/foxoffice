@@ -56,7 +56,7 @@ if (isset($_FILES['csv'])) {
     if (empty($errors) == true) {
         try {
             $csv_data = process_csv($_FILES['csv']['tmp_name']);
-            $report = import_csv_data($csv_data);
+            $report = import_csv_data($pdo, $csv_data);
 
             # Status is 'Approved':
                 # Person exists in `people` table:

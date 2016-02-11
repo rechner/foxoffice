@@ -1,5 +1,5 @@
 <?php
-require_once('fpdf181/fpdf.php');
+require_once('fpdf/fpdf.php');
 
 //Stream handler to read from global variables
 class VariableStream
