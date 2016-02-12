@@ -56,7 +56,6 @@ if (isset($_FILES['csv'])) {
     if (empty($errors) == true) {
         try {
             $csv_data = process_csv($_FILES['csv']['tmp_name']);
-            $report = import_csv_data($pdo, $csv_data);
 
             # Status is 'Approved':
                 # Person exists in `people` table:
@@ -156,7 +155,9 @@ include ('../templates/header.inc');
             </div>
         </div>
 
-        <?php if (isset($report)) { ?>
+        <?php 
+            $report = import_csv_data($pdo, $csv_data);
+            if (isset($report)) { ?>
         <div class="row">
             <div class="col-lg-12">
                 <div class="panel panel-default">

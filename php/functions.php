@@ -392,7 +392,21 @@ function insert_person($dbh, $name, $email) {
 function insert_order($dbh, $person_id, $seats, $hash, $status, $filename) {
     $sth = $dbh->prepare("INSERT INTO `orders`(`pid`, `seats`, `hash`, `status`, `filename`) VALUES (?,?,?,?,?);");
     $sth->execute(array($person_id, $seats, $hash, $status, $filename));
-    return $dbh->lastInsertId();
+    $return_id = $dbh->lastInsertId();
+
+    $sth = $dbh->prepare("INSERT INTO `telegram_auth`(`hash`, `pid`) VALUES (?, ?);");
+    $sth->execute(array(uniqid('zootopia', true), $person_id));
+    return $return_id;
+}
+
+function get_telegram_auth($person_id) {
+    $sth = $dbh->prepare("SELECT `hash` FROM `telegram_auth` WHERE `pid` = ?;");
+    $sth->execute($person_id);
+    if ($result) {
+        return $result['hash'];
+    } else {
+        return null;
+    }
 }
 
 function get_order($dbh, $order_id) {
