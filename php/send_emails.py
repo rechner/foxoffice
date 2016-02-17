@@ -113,10 +113,18 @@ message_html = """
 <p>
 Please print your ticket to present for admission.  Your tickets may also
 be retrieved via telegram presented on your phone by clicking 
-<a href="https://telegram.me/novafurs_bot?start={nonce}">here</a>
+<a href="https://telegram.me/novafurs_bot?start={nonce}">here</a>.
 </p>
 
-<h2>Event Rules</h2>
+<div><!--[if mso]>
+<v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="http://" style="height:40px;v-text-anchor:middle;width:300px;" arcsize="10%" strokecolor="#1e3650" fillcolor="#556270">
+<w:anchorlock/>
+<center style="color:#ffffff;font-family:sans-serif;font-size:13px;font-weight:bold;">Open Tickets in Telegram</center>center>
+</v:roundrect>v:roundrect>
+<![endif]--><a href="https://telegram.me/novafurs_bot?start={nonce}"
+style="background-color:#556270;border:1px solid #1e3650;border-radius:4px;color:#ffffff;display:inline-block;font-family:sans-serif;font-size:13px;font-weight:bold;line-height:40px;text-align:center;text-decoration:none;width:300px;-webkit-text-size-adjust:none;mso-hide:all;">Open Tickets in Telegram</a></div>
+
+<h3>Event Rules</h3>
 
 <p>
 The theatre will open at 11:00am.  We will be starting the showing at noon.
@@ -238,7 +246,7 @@ server = smtplib.SMTP('smtp.gmail.com:587')
 server.ehlo()
 server.starttls()
 
-server.login('do-not-reply@novafurs.com', 'PASSWORDHERE')
+server.login('novafurs@someplace.net', 'PASSWORD')
 
 for order in orders:
     order = dict(order)
