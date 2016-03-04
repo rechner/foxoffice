@@ -1,0 +1,47 @@
+{% extends "layout.html" %}
+{% block title %}Ticket scanner - manual{% endblock %}
+
+{% block body %}
+<div class="row">
+    <div class="col-md-4 col-md-offset-4">
+        <div class="btn-group btn-group-justified" role="group">
+            <a class="btn btn-primary btn-lg" href="{{ url_for('index') }}" style="width: 0.3%">
+                <span class="glyphicon glyphicon-home"></span>
+            </a>
+            <a class="btn btn-success btn-lg"
+                href="zxing://scan/?ret={{ url_for('scan', code="", _external=True) | urlencode }}{CODE}&SCAN_FORMATS=QR_CODE,DATA_MATRIX">
+                <span class="glyphicon glyphicon-qrcode"></span> Scan QR
+            </a>
+        </div>
+    </div>
+</div>
+<div class="row">
+  <div class="well col-md-4 col-md-offset-4" id="login-well">
+    {% if error %}
+        <div class="alert alert-danger">
+            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+            {{ error }}
+        </div>
+    {% endif %}
+
+    {% if unchecked|length == 0 %}
+      No tickets unchecked
+    {% endif %}
+
+    <table class="table">
+      <tr>
+        <th>Name</th>
+        <th>Ticket Number</th>
+      </tr>
+      {% for ticket in unchecked %}
+      <tr>
+        <td>{{ ticket.name }}</td>
+        <td>{{ ticket.ticketnumber }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+  
+  </div>
+</div>
+
+{% endblock %}

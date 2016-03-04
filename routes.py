@@ -53,10 +53,13 @@ def search_ticket(query):
     if tickets is None:
         return None
     tickets = dict(tickets)
-    tickets['order'] = get_order(tickets['oid'])
-    tickets['person'] = get_person(tickets['order']['pid'])
-    tickets['status_id'] = tickets['status']
-    tickets['status'] = g.status_table[tickets['status']]
+    tickets['order'] = get_order(tickets['pid'])
+    tickets['person'] = get_person(tickets['pid'])
+    tickets['status_id'] = tickets['order']['status']
+    tickets['status'] = g.status_table[tickets['order']['status']]
+    tickets['seats'] = tickets['order']['seats']
+    if tickets['checkin'] == 0:
+        tickets['checkin'] = None
     checkin_ticket(tickets['tid'])
     return tickets
 
@@ -70,7 +73,7 @@ def get_person(id):
 
 def get_order(id):
     db = get_db()
-    cur = db.execute("SELECT * FROM `orders` WHERE `oid` = ?", (id,))
+    cur = db.execute("SELECT * FROM `orders` WHERE `pid` = ?", (id,))
     order = cur.fetchone()
     if order is None:
         return None
@@ -104,6 +107,14 @@ def manual_scan():
         if result is None:
             error = 'No results for {0}'.format(request.form['input'])
     return render_template('manual.html', result=result, error=error)
+
+@app.route('/unchecked')
+def unchecked():
+    db = get_db()
+    cur = db.execute("select * from tickets join people on tickets.pid = people.pid where tickets.checkin = 0;")
+    tickets = cur.fetchall()
+    print(tickets)
+    return render_template('unchecked.html', unchecked=tickets)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
