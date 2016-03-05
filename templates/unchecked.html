@@ -28,15 +28,24 @@
       No tickets unchecked
     {% endif %}
 
+    <p>Total: {{ unchecked|length }}
+
     <table class="table">
       <tr>
         <th>Name</th>
         <th>Ticket Number</th>
+        <th>Action</th>
       </tr>
       {% for ticket in unchecked %}
       <tr>
         <td>{{ ticket.name }}</td>
         <td>{{ ticket.ticketnumber }}</td>
+        <td>
+            <a class="btn btn-danger"
+                href="{{ url_for('scan', code=ticket.ticketnumber) }}">
+                <span class="glyphicon glyphicon-check"></span>
+            </a>
+        </td>
       </tr>
       {% endfor %}
     </table>

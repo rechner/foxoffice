@@ -113,7 +113,6 @@ def unchecked():
     db = get_db()
     cur = db.execute("select * from tickets join people on tickets.pid = people.pid where tickets.checkin = 0;")
     tickets = cur.fetchall()
-    print(tickets)
     return render_template('unchecked.html', unchecked=tickets)
 
 @app.route('/login', methods=['GET', 'POST'])
